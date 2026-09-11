@@ -2,6 +2,11 @@ import React from "react";
 
 export default function Icon({ name, size = 20, ...props }) {
   const paths = {
+    upload: (
+      <>
+        <path d="M12 16V3m-5 5 5-5 5 5M4 16v6h16v-6" />
+      </>
+    ),
     cube: (
       <>
         <path d="m12 3 9 5v9l-9 5-9-5V8Z" />

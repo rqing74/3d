@@ -10,6 +10,9 @@ export default function PrinterView({
   running,
   view,
   setView,
+  asset,
+  plan,
+  busy,
 }) {
   const mount = useRef(null),
     engine = useRef(null),
@@ -35,20 +38,29 @@ export default function PrinterView({
     };
   }, []);
   useEffect(() => {
-    engine.current?.rebuild(model, layers);
-  }, [model, layers]);
+    engine.current?.rebuild(
+      model,
+      layers,
+      model === "imported" ? asset : null,
+      model === "imported" ? plan : null,
+    );
+  }, [model, layers, asset, plan]);
   useEffect(() => {
     engine.current?.view(view);
   }, [view]);
   const status = error
     ? "View unavailable"
-    : progress === 1
-      ? "Print complete"
-      : running
-        ? "Printing"
-        : progress === 0
-          ? "Ready to print"
-          : "Paused";
+    : model === "imported" && !plan
+      ? busy
+        ? "Slicing model…"
+        : "Model preview"
+      : progress === 1
+        ? "Print complete"
+        : running
+          ? "Printing"
+          : progress === 0
+            ? "Ready to print"
+            : "Paused";
   return (
     <section className="viewport" aria-label="3D workspace">
       <div className="scene" ref={mount} />

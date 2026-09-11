@@ -1,5 +1,6 @@
 import React from "react";
 import Icon from "./icons.jsx";
+import ImportPanel from "./ImportPanel.jsx";
 
 const colors = [
   ["#ff7847", "Ember orange"],
@@ -31,6 +32,8 @@ export default function Settings({
   running,
   progress,
   onToggle,
+  importProps,
+  canPrint,
 }) {
   return (
     <aside className="settings" aria-label="Print settings">
@@ -57,6 +60,13 @@ export default function Settings({
             </button>
           ))}
         </div>
+        <ImportPanel
+          {...importProps}
+          selected={model === "imported"}
+          speed={speed}
+          running={running}
+          progress={progress}
+        />
       </section>
       <section className="setting-section">
         <SectionTitle number="02">Material</SectionTitle>
@@ -103,7 +113,11 @@ export default function Settings({
           <label>
             Print structure
             <div className="static-field">
-              {model === "vase" ? "Vase mode" : "Hollow shell"}
+              {model === "imported"
+                ? "Mesh perimeters"
+                : model === "vase"
+                  ? "Vase mode"
+                  : "Hollow shell"}
               <Icon name="layers" size={15} />
             </div>
           </label>
@@ -164,18 +178,20 @@ export default function Settings({
             </div>
           </div>
         </div>
-        <button className="primary" onClick={onToggle}>
+        <button className="primary" onClick={onToggle} disabled={!canPrint}>
           <Icon
             name={running ? "pause" : progress === 1 ? "reset" : "play"}
             size={20}
           />
-          {running
-            ? "Pause print"
-            : progress === 1
-              ? "Print again"
-              : progress === 0
-                ? "Start print"
-                : "Resume print"}
+          {!canPrint
+            ? "Generate flow to print"
+            : running
+              ? "Pause print"
+              : progress === 1
+                ? "Print again"
+                : progress === 0
+                  ? "Start print"
+                  : "Resume print"}
         </button>
         <div className="system-status">
           <span>

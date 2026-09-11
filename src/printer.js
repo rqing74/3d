@@ -3,6 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { BED_Y, WORLD_HEIGHT, createToolpath } from "./toolpath.js";
+import { locateMove } from "./slicer.js";
 
 export function createPrinter(container, onError) {
   const scene = new THREE.Scene();
@@ -359,6 +360,19 @@ export function createPrinter(container, onError) {
     points = [],
     layers = 200,
     lastColor;
+  let previewMesh,
+    activePlan = null,
+    importedPreview = false,
+    indexCounts = [];
+  const previewMaterial = new THREE.MeshStandardMaterial({
+    color: "#94aeb9",
+    roughness: 0.5,
+    metalness: 0.2,
+    transparent: true,
+    opacity: 0.6,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  });
   function updateFeed(p) {
     const end = new THREE.Vector3(p.x, p.y + 1.17, p.z);
     const feedCurve = new THREE.CubicBezierCurve3(
@@ -384,15 +398,46 @@ export function createPrinter(container, onError) {
       cableMesh.geometry = cableGeo;
     } else cableMesh = mesh(cableGeo, mats.black, [0, 0, 0]);
   }
-  function rebuild(model, count) {
+  function rebuild(model, count, asset = null, plan = null) {
     lastFeedProgress = -1;
     lastFeed = 0;
     layers = count;
-    points = createToolpath(model, layers);
-    const radius = (WORLD_HEIGHT / layers) * 0.53;
+    activePlan = plan;
+    importedPreview = Boolean(asset);
+    if (asset) {
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute(
+        "position",
+        new THREE.BufferAttribute(asset.positions, 3),
+      );
+      geometry.computeVertexNormals();
+      if (previewMesh) {
+        previewMesh.geometry.dispose();
+        previewMesh.geometry = geometry;
+      } else previewMesh = mesh(geometry, previewMaterial, [0, 0, 0]);
+      previewMesh.castShadow = false;
+      previewMaterial.opacity = plan ? 0.18 : 0.6;
+    }
+    if (previewMesh) previewMesh.visible = Boolean(asset);
+    points = plan
+      ? Array.from({ length: plan.times.length }, (_, i) =>
+          Array.from(plan.points.subarray(i * 3, i * 3 + 3)),
+        )
+      : asset
+        ? [
+            [2.1, BED_Y + asset.dimensions[1] * WORLD_HEIGHT / 40 + 0.14, 1.6],
+            [2.1, BED_Y + asset.dimensions[1] * WORLD_HEIGHT / 40 + 0.14, 1.6],
+          ]
+        : createToolpath(model, layers);
+    const radius =
+      (plan
+        ? (plan.layerHeightMM * WORLD_HEIGHT) / 40
+        : WORLD_HEIGHT / Math.max(1, layers)) * 0.53;
     const positions = new Float32Array(points.length * 6 * 3),
       normals = new Float32Array(positions.length);
     const indices = new Uint32Array((points.length - 1) * 36);
+    indexCounts = new Uint32Array(points.length);
+    let written = 0;
     for (let i = 0; i < points.length; i++) {
       const p = points[i],
         prev = points[Math.max(0, i - 1)],
@@ -414,17 +459,19 @@ export function createPrinter(container, onError) {
           ],
           k,
         );
-        if (i < points.length - 1) {
+        if (i < points.length - 1 && (!plan || plan.extruding[i + 1])) {
           const v = i * 6 + j,
             n = i * 6 + ((j + 1) % 6);
-          indices.set([v, n, v + 6, n, n + 6, v + 6], (i * 6 + j) * 6);
+          indices.set([v, n, v + 6, n, n + 6, v + 6], written);
+          written += 6;
         }
       }
+      if (i < points.length - 1) indexCounts[i + 1] = written;
     }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geo.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
-    geo.setIndex(new THREE.BufferAttribute(indices, 1));
+    geo.setIndex(new THREE.BufferAttribute(indices.subarray(0, written), 1));
     geo.computeBoundingSphere();
     if (printMesh) {
       printMesh.geometry.dispose();
@@ -439,15 +486,22 @@ export function createPrinter(container, onError) {
       mats.filament.color.set(color).multiplyScalar(0.66);
       lastColor = color;
     }
-    const index = Math.min(
-      points.length - 2,
-      Math.floor(progress * (points.length - 1)),
-    );
+    const move = activePlan
+      ? locateMove(activePlan.times, progress)
+      : { index: Math.floor(progress * (points.length - 1)), alpha: 0 };
+    const index = Math.min(points.length - 1, move.index);
     const p = new THREE.Vector3(...points[Math.max(0, index)]);
+    if (activePlan && move.alpha > 0)
+      p.lerp(
+        new THREE.Vector3(...points[Math.min(index + 1, points.length - 1)]),
+        move.alpha,
+      );
     printMesh.geometry.setDrawRange(
       0,
-      Math.floor(progress * (points.length - 1)) * 36,
+      importedPreview && !activePlan ? 0 : indexCounts[index],
     );
+    if (previewMesh)
+      previewMesh.visible = importedPreview && (!activePlan || progress === 0);
     gantry.position.set(0, p.y + 0.57, p.z - 0.24);
     head.position.x = p.x;
     stage.position.y = p.y + 0.57;
@@ -545,6 +599,7 @@ export function createPrinter(container, onError) {
       });
       geometries.forEach((g) => g.dispose());
       materials.forEach((m) => m.dispose());
+      previewMaterial.dispose();
       labelTexture.dispose();
       environment.dispose();
       renderer.dispose();

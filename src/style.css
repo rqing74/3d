@@ -1513,3 +1513,199 @@ input[type="range"]::-moz-range-thumb {
     min-width: 34px;
   }
 }
+/* Imported models use the existing inspector and keep their workflow local. */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+input:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.model-import {
+  margin-top: 13px;
+}
+.file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.import-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px dashed #586167;
+  border-radius: 5px;
+  padding: 10px 11px;
+  font-size: 12px;
+}
+.import-button > span {
+  margin-left: auto;
+  color: #89959d;
+  font: 9px var(--mono);
+}
+.import-button svg {
+  color: var(--accent);
+}
+.import-card {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #404a50;
+  border-radius: 5px;
+  background: #ffffff03;
+}
+.import-filename {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+}
+.import-filename > b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.import-filename > span {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: #89959d;
+  font-size: 9px;
+}
+.import-meta {
+  font: 10px var(--mono);
+  color: #c4cdd2;
+  margin: 9px 0;
+}
+.import-meta span {
+  font-size: 8px;
+  color: #83909a;
+}
+.import-axis {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #a7b3bb;
+  font-size: 11px;
+  gap: 10px;
+}
+.import-axis select {
+  max-width: 140px;
+  background: #1c2023;
+  color: #dbe1e5;
+  border: 1px solid #414b52;
+  border-radius: 4px;
+  padding: 5px 7px;
+  font-size: 10px;
+}
+.import-note {
+  font-size: 9px;
+  line-height: 1.6;
+  color: #8d9ca6;
+  margin: 8px 0 0;
+}
+.flow-steps {
+  display: flex;
+  justify-content: space-between;
+  gap: 9px;
+  margin: 13px 0 10px;
+  color: #77838b;
+  font: 10px var(--mono);
+}
+.flow-steps span {
+  border-top: 2px solid #3e484e;
+  flex: 1;
+  padding-top: 6px;
+}
+.flow-steps .done {
+  color: #a8ccae;
+  border-color: #74a580;
+}
+.flow-steps .current {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.generate-button {
+  width: 100%;
+  min-height: 33px;
+  font-size: 11px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-color: #9c6049;
+  color: #ffab89;
+  background: #ff794808;
+}
+.flow-summary {
+  margin-top: 10px;
+  color: #aebcc5;
+  font-size: 10px;
+  line-height: 1.9;
+}
+.flow-summary b {
+  font-weight: 500;
+  color: #e2e7ea;
+}
+.flow-summary button {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid #384249;
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0 0;
+  margin-top: 7px;
+  font-size: 11px;
+  color: #e5c4b6;
+}
+.flow-summary button span {
+  font: 9px var(--mono);
+  color: #8c9da8;
+}
+.import-error {
+  color: #ffb299;
+  font-size: 11px;
+  line-height: 1.6;
+  padding: 9px 10px;
+  background: #ff79480c;
+  border-left: 2px solid #c87a5a;
+}
+.return-import {
+  width: 100%;
+  padding: 9px;
+  margin-top: 8px;
+  color: #a9b8c2;
+  font-size: 10px;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+.import-card progress {
+  width: 100%;
+  height: 4px;
+  accent-color: var(--accent);
+  display: block;
+  margin-bottom: 10px;
+}
+.settings:has(.import-card) .setting-section {
+  flex-shrink: 0;
+}
+@media (max-width: 560px) {
+  .import-button {
+    min-height: 42px;
+  }
+  .import-note {
+    font-size: 10px;
+  }
+  .import-axis select {
+    font-size: 12px;
+    padding: 7px;
+  }
+  .generate-button {
+    min-height: 40px;
+    font-size: 12px;
+  }
+}
