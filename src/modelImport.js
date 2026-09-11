@@ -13,7 +13,14 @@ export function parseModel(name, buffer) {
   const extension = name.split(".").pop().toLowerCase();
   let positions;
   if (extension === "stl") {
-    const geometry = new STLLoader().parse(buffer);
+    let geometry;
+    try {
+      geometry = new STLLoader().parse(buffer);
+    } catch {
+      throw new Error(
+        "This STL file could not be read. Re-export a valid binary or ASCII STL and try again.",
+      );
+    }
     positions = geometry.getAttribute("position")?.array.slice();
     geometry.dispose();
   } else if (extension === "obj") {

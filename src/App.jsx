@@ -366,11 +366,11 @@ export default function App() {
           </li>
         </ol>
         <div className="help-note">
-          This is a visual simulation, not a slicer or printer controller.
-          Presets take about 4 minutes at 1× and 60 mm/s; imported motion runs
-          at 3× real time before the selected multiplier. Import units are
-          assumed to be mm. No infill, support generation, or G-code is
-          included. Temperature values are simulated targets. Imported files
+          This is a visual simulation, not a production slicer or printer
+          controller. Presets take about 4 minutes at 1× and 60 mm/s; imported
+          motion runs at 3× real time before the selected multiplier. Import
+          units are assumed to be mm. No infill, support generation, or G-code
+          is included. Temperature values are simulated targets. Imported files
           stay in your browser.
         </div>
         <button className="primary" onClick={() => setHelp(false)}>

@@ -425,8 +425,16 @@ export function createPrinter(container, onError) {
         )
       : asset
         ? [
-            [2.1, BED_Y + asset.dimensions[1] * WORLD_HEIGHT / 40 + 0.14, 1.6],
-            [2.1, BED_Y + asset.dimensions[1] * WORLD_HEIGHT / 40 + 0.14, 1.6],
+            [
+              2.1,
+              BED_Y + (asset.dimensions[1] * WORLD_HEIGHT) / 40 + 0.14,
+              1.6,
+            ],
+            [
+              2.1,
+              BED_Y + (asset.dimensions[1] * WORLD_HEIGHT) / 40 + 0.14,
+              1.6,
+            ],
           ]
         : createToolpath(model, layers);
     const radius =
